@@ -1,0 +1,31 @@
+services:
+
+  database:
+    image: postgres
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      - HOST=host.docker.internal
+      - POSTGRES_PASSWORD=marketplace_cart
+      - POSTGRES_USER=marketplace_cart
+      - POSTGRES_DB=marketplace_cart
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+
+  server:
+    restart: always
+    build:
+      dockerfile: Dockerfile
+      context: .
+    environment:
+      - APP_ENV=development
+      - WEBSERVER_RESTAPI_ADDRESS=8000
+      - DATABASE_DSN=postgres://marketplace_cart_login:marketplace_cart_password@host.docker.internal:5432/marketplace_cart
+      - DATABASE_DRIVER=pgx
+    ports:
+      - 8000:8000
