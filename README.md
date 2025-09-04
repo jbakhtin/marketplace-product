@@ -1,3 +1,4 @@
+[![codecov](https://codecov.io/gh/jbakhtin/marketplace-product/graph/badge.svg?token=5REv1ymRVB)](https://codecov.io/gh/jbakhtin/marketplace-product)
 ## Marketplace Product Service
 
 Коротко: сервис продуктов маркетплейса. Простые команды для запуска через Docker.
