@@ -7,9 +7,9 @@ services:
       - 5432:5432
     environment:
       - HOST=host.docker.internal
-      - POSTGRES_PASSWORD=marketplace_cart
-      - POSTGRES_USER=marketplace_cart
-      - POSTGRES_DB=marketplace_cart
+      - POSTGRES_PASSWORD=marketplace_product
+      - POSTGRES_USER=marketplace_product
+      - POSTGRES_DB=marketplace_product
 
   adminer:
     image: adminer
@@ -24,8 +24,8 @@ services:
       context: .
     environment:
       - APP_ENV=development
-      - WEBSERVER_RESTAPI_ADDRESS=8000
-      - DATABASE_DSN=postgres://marketplace_cart_login:marketplace_cart_password@host.docker.internal:5432/marketplace_cart
+      - WEBSERVER_RESTAPI_ADDRESS=:8000
+      - DATABASE_DSN=postgres://marketplace_product:marketplace_product@host.docker.internal:5432/marketplace_product
       - DATABASE_DRIVER=pgx
     ports:
       - 8000:8000

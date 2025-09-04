@@ -8,10 +8,14 @@ type Config struct {
 	}
 	WebServer struct {
 		RESTAPI struct {
-			Address string `env:"WEBSERVER_RESTAPI_ADDRESS" envDefault:":8080"`
+			Address string `env:"WEBSERVER_RESTAPI_ADDRESS" envDefault:":8000"`
 		}
 	}
 	Logger struct {
+	}
+	Database struct {
+		Driver string `env:"DATABASE_DRIVER" envDefault:"pgx"`
+		DSN    string `env:"DATABASE_DSN" envDefault:"postgres://postgres:postgres@localhost:5432/marketplace_product?sslmode=disable"`
 	}
 }
 
@@ -31,4 +35,12 @@ func (c *Config) GetServerHTTPAddress() string {
 
 func (c *Config) GetAppKey() string {
 	return c.App.Key
+}
+
+func (c *Config) GetDataBaseDriver() string {
+	return c.Database.Driver
+}
+
+func (c *Config) GetDataBaseDSN() string {
+	return c.Database.DSN
 }

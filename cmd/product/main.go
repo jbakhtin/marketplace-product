@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"log"
 	"os/signal"
@@ -13,6 +14,7 @@ import (
 	"github.com/jbakhtin/marketplace-product/internal/infrastructure/config"
 	"github.com/jbakhtin/marketplace-product/internal/infrastructure/logger/zap"
 	"github.com/jbakhtin/marketplace-product/internal/infrastructure/server/rest"
+	"github.com/jbakhtin/marketplace-product/internal/infrastructure/storage/postgres"
 	"github.com/jbakhtin/marketplace-product/internal/infrastructure/storage/postgres/repositories"
 	"github.com/jbakhtin/marketplace-product/internal/modules/product"
 )
@@ -22,6 +24,7 @@ var logger zap.Logger
 var str starter.Starter
 var clr closer.Closer
 var cfg config.Config
+var db *sql.DB
 var restServer rest.Server
 
 func init() {
@@ -35,20 +38,29 @@ func init() {
 		log.Fatal(err)
 	}
 
+	// Инициализация клиента БД
+	db, err = postgres.NewSQLClient(&cfg)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	starterBuilder := starter.New()
 	closerBuilder := closer.New()
 
-	productStorage, err := repositories.NewProductStorage()
+	// Добавляем закрытие БД в closer
+	closerBuilder.Add(func(ctx context.Context) error {
+		return db.Close()
+	})
+
+	// Создаем репозиторий с подключением к БД
+	productStorage := repositories.NewProductStorage(db)
+
+	productModule, err := product.InitModule(logger, productStorage)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	lomsModule, err := product.InitModule(logger, &productStorage)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	restServer, err = rest.NewWebServer(&cfg, logger, lomsModule)
+	restServer, err = rest.NewWebServer(&cfg, logger, productModule)
 	if err != nil {
 		log.Fatal(err)
 	}
