@@ -14,7 +14,7 @@ RUN go mod download
 COPY . .
 
 # Build
-RUN go build -a -o /app/bin/server /app/cmd/cart/main.go
+RUN go build -a -o /app/bin/server /app/cmd/product/main.go
 
 # Run
 CMD ["/app/bin/server"]

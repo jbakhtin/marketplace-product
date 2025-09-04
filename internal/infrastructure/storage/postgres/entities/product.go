@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+
 	"github.com/jbakhtin/marketplace-product/internal/modules/product/domain"
 )
 
@@ -34,10 +35,10 @@ func (m *FingerPrint) Scan(value interface{}) error {
 }
 
 type Product struct {
-	ID    *int         `json:"id,omitempty" :"id" ß:"id"`
-	sku   domain.SKU   `:"sku" ß:"sku"`
-	name  domain.Name  `:"sku" ß:"name"`
-	price domain.Price `:"price"`
+	ID    *int         `json:"id,omitempty" db:"id"`
+	SKU   domain.SKU   `json:"sku" db:"sku"`
+	Name  domain.Name  `json:"name" db:"name"`
+	Price domain.Price `json:"price" db:"price"`
 }
 
 //func NewEntity(model models.Session) Session {
@@ -48,8 +49,8 @@ type Product struct {
 
 func (s *Product) ToModel() domain.Product {
 	return domain.Product{
-		SKU:   s.sku,
-		Name:  s.name,
-		Price: s.price,
+		SKU:   s.SKU,
+		Name:  s.Name,
+		Price: s.Price,
 	}
 }

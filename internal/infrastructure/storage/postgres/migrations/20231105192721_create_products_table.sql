@@ -1,6 +1,6 @@
 -- +goose Up
 -- +goose StatementBegin
-CREATE TABLE production (
+CREATE TABLE products (
     id bigserial NOT NULL PRIMARY KEY,
     sku int NOT NULL,
     name varchar(80),
@@ -9,13 +9,13 @@ CREATE TABLE production (
     updated_at timestamp NOT NULL DEFAULT now()
 );
 
-CREATE TRIGGER set_timestamp_trigger_productions
-BEFORE UPDATE ON productions
+CREATE TRIGGER set_timestamp_trigger_products
+BEFORE UPDATE ON products
 FOR EACH ROW
 EXECUTE FUNCTION trigger_set_timestamp();
 -- +goose StatementEnd
 
 -- +goose Down
 -- +goose StatementBegin
-DROP TABLE productions;
+DROP TABLE products;
 -- +goose StatementEnd
