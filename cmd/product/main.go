@@ -17,6 +17,7 @@ import (
 	"github.com/jbakhtin/marketplace-product/internal/infrastructure/storage/postgres"
 	"github.com/jbakhtin/marketplace-product/internal/infrastructure/storage/postgres/repositories"
 	"github.com/jbakhtin/marketplace-product/internal/modules/product"
+	"github.com/joho/godotenv"
 )
 
 var err error
@@ -28,6 +29,9 @@ var db *sql.DB
 var restServer rest.Server
 
 func init() {
+	// Load .env if present (no error if absent)
+	_ = godotenv.Load()
+
 	cfg, err = config.NewConfig()
 	if err != nil {
 		fmt.Println(err.Error())

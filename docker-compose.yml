@@ -22,10 +22,7 @@ services:
     build:
       dockerfile: Dockerfile
       context: .
-    environment:
-      - APP_ENV=development
-      - WEBSERVER_RESTAPI_ADDRESS=:8000
-      - DATABASE_DSN=postgres://marketplace_product:marketplace_product@host.docker.internal:5432/marketplace_product
-      - DATABASE_DRIVER=pgx
+    env_file:
+      - .env
     ports:
       - 8000:8000
