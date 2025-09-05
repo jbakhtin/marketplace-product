@@ -29,6 +29,8 @@ func (p *ProductStorage) GetProductBySKU(ctx context.Context, SKU domain.SKU) (d
 		&product.SKU,
 		&product.Name,
 		&product.Price,
+		&product.CreatedAt,
+		&product.UpdatedAt,
 	)
 
 	if err != nil {

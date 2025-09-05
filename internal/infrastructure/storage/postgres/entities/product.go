@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"github.com/jackc/pgx/v5/pgtype"
 
 	"github.com/jbakhtin/marketplace-product/internal/modules/product/domain"
 )
@@ -35,10 +36,12 @@ func (m *FingerPrint) Scan(value interface{}) error {
 }
 
 type Product struct {
-	ID    *int         `json:"id,omitempty" db:"id"`
-	SKU   domain.SKU   `json:"sku" db:"sku"`
-	Name  domain.Name  `json:"name" db:"name"`
-	Price domain.Price `json:"price" db:"price"`
+	ID        *int         `json:"id,omitempty" db:"id"`
+	SKU       domain.SKU   `json:"sku" db:"sku"`
+	Name      domain.Name  `json:"name" db:"name"`
+	Price     domain.Price `json:"price" db:"price"`
+	CreatedAt pgtype.Date  `json:"created_at" db:"created_at"`
+	UpdatedAt pgtype.Date  `json:"updated_at" db:"updated_at"`
 }
 
 //func NewEntity(model models.Session) Session {
