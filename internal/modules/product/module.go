@@ -10,13 +10,13 @@ type Module struct {
 }
 
 func InitModule(logger ports.Logger, productRepository ports.ProductRepository) (Module, error) {
-	cartUseCase, err := use_case.NewProductUseCase(logger, productRepository)
+	productUseCase, err := use_case.NewProductUseCase(logger, productRepository)
 	if err != nil {
 		return Module{}, err
 	}
 
 	return Module{
-		productUseCase: cartUseCase,
+		productUseCase: productUseCase,
 	}, nil
 }
 

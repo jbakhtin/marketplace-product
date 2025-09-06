@@ -1,31 +1,39 @@
 package product
 
 import (
-	"encoding/json"
 	"net/http"
+	"strconv"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/jbakhtin/marketplace-product/internal/infrastructure/server/rest/handler/response"
 	"github.com/jbakhtin/marketplace-product/internal/modules/product/domain"
+	"github.com/pkg/errors"
 )
 
-type DeleteItemRequest struct {
-	ItemSKU domain.SKU
+type GetProductBySKUResponse struct {
+	Product domain.Product `json:"product"`
 }
 
 func (o *Handler) Get(w http.ResponseWriter, r *http.Request) {
-	var request DeleteItemRequest
-	_ = json.NewDecoder(r.Body).Decode(&request)
+	skuParam := r.URL.Query().Get("sku")
+	if skuParam == "" {
+		response.WriteStandardResponse(w, r, http.StatusBadRequest, nil, errors.New("empty sku param"))
+		return
+	}
 
-	validate := validator.New()
-	err := validate.Struct(request)
+	skuInt, err := strconv.Atoi(skuParam)
 	if err != nil {
 		response.WriteStandardResponse(w, r, http.StatusBadRequest, nil, err)
 		return
 	}
 
-	// TODO: add logic
-	// ...
+	product, err := o.useCase.GetProductBySKU(r.Context(), domain.SKU(skuInt))
+	if err != nil {
+		o.log.Error(err.Error())
+		response.WriteStandardResponse(w, r, http.StatusBadRequest, nil, err)
+		return
+	}
 
-	response.WriteStandardResponse(w, r, http.StatusOK, nil, nil)
+	response.WriteStandardResponse(w, r, http.StatusOK, GetProductBySKUResponse{
+		Product: product,
+	}, nil)
 }

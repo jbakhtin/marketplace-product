@@ -1,4 +1,4 @@
-package router
+package chi
 
 import (
 	"net/http"
@@ -6,7 +6,6 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/jbakhtin/marketplace-product/internal/infrastructure/server/rest/handler/product"
-	custommiddleware "github.com/jbakhtin/marketplace-product/internal/infrastructure/server/rest/middleware"
 	"github.com/jbakhtin/marketplace-product/internal/modules/product/ports"
 	"github.com/jbakhtin/marketplace-product/internal/modules/product/use_case"
 )
@@ -18,9 +17,9 @@ type Config interface {
 func NewRouter(
 	cfg Config,
 	logger ports.Logger,
-	cartUseCase use_case.ProductUseCase,
+	productUseCase use_case.ProductUseCase,
 ) (*chi.Mux, error) {
-	cartHandler, err := product.NewProductHandler(cfg, logger, cartUseCase)
+	productHandler, err := product.NewProductHandler(cfg, logger, productUseCase)
 	if err != nil {
 		return nil, err
 	}
@@ -42,11 +41,11 @@ func NewRouter(
 	})
 
 	// product routes with auth middleware
-	authMiddleware := custommiddleware.NewAuthMiddleware(cfg)
+	//authMiddleware := custommiddleware.NewAuthMiddleware(cfg)
 	router.Route("/product", func(r chi.Router) {
-		r.Use(authMiddleware.Auth)
-		r.Get("/get", cartHandler.Get)
-		r.Post("/list", cartHandler.List)
+		//r.Use(authMiddleware.Auth)
+		r.Get("/get", productHandler.Get)
+		r.Get("/list", productHandler.List)
 	})
 
 	return router, nil

@@ -21,6 +21,20 @@ func NewProductUseCase(
 	}, nil
 }
 
-func (o *ProductUseCase) GetProductUseCase(ctx context.Context, SKU domain.SKU) (domain.Product, error) {
-	return domain.Product{}, nil
+func (o *ProductUseCase) GetProductBySKU(ctx context.Context, SKU domain.SKU) (domain.Product, error) {
+	product, err := o.productRepository.GetProductBySKU(ctx, SKU)
+	if err != nil {
+		return domain.Product{}, err
+	}
+
+	return product, nil
+}
+
+func (o *ProductUseCase) GetSKUList(ctx context.Context, startSKU domain.SKU, count int) ([]domain.SKU, error) {
+	skus, err := o.productRepository.GetSKUList(ctx, startSKU, count)
+	if err != nil {
+		return nil, err
+	}
+
+	return skus, nil
 }
