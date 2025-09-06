@@ -22,9 +22,6 @@ jobs:
       - name: Install dependencies
         run: go mod download
 
-      - name: Пщ
-        run: go mod download
-
       - name: Run tests
         run: go test ./... -coverpkg=./... -coverprofile=coverage.txt
 

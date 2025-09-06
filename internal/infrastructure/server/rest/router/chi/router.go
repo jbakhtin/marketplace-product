@@ -1,4 +1,4 @@
-package router
+package chi
 
 import (
 	"net/http"
