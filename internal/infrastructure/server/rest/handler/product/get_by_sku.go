@@ -1,11 +1,12 @@
 package product
 
 import (
+	"net/http"
+	"strconv"
+
 	"github.com/jbakhtin/marketplace-product/internal/infrastructure/server/rest/handler/response"
 	"github.com/jbakhtin/marketplace-product/internal/modules/product/domain"
 	"github.com/pkg/errors"
-	"net/http"
-	"strconv"
 )
 
 type GetProductBySKUResponse struct {
