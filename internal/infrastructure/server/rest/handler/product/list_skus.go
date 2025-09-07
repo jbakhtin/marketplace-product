@@ -1,32 +1,46 @@
 package product
 
 import (
-	"encoding/json"
+	"errors"
 	"github.com/jbakhtin/marketplace-product/internal/modules/product/domain"
 	"net/http"
+	"strconv"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/jbakhtin/marketplace-product/internal/infrastructure/server/rest/handler/response"
 )
 
-type GetSKUsListRequest struct {
-	StartSKU domain.SKU
-	Count    int32
+type GetSKUsListResponse struct {
+	List []domain.SKU
 }
 
 func (o *Handler) List(w http.ResponseWriter, r *http.Request) {
-	var request GetSKUsListRequest
-	_ = json.NewDecoder(r.Body).Decode(&request)
+	startSkuParam := r.URL.Query().Get("start_sku")
+	if startSkuParam == "" {
+		response.WriteStandardResponse(w, r, http.StatusBadRequest, nil, errors.New("empty start_sku param"))
+		return
+	}
 
-	validate := validator.New()
-	err := validate.Struct(request)
+	startSkuInt, err := strconv.Atoi(startSkuParam)
 	if err != nil {
 		response.WriteStandardResponse(w, r, http.StatusBadRequest, nil, err)
 		return
 	}
 
-	// TODO: add logic
-	// ...
+	countParam := r.URL.Query().Get("count")
+	if countParam == "" {
+		response.WriteStandardResponse(w, r, http.StatusBadRequest, nil, errors.New("empty count param"))
+		return
+	}
 
-	response.WriteStandardResponse(w, r, http.StatusOK, nil, nil)
+	countInt, err := strconv.Atoi(countParam)
+	if err != nil {
+		response.WriteStandardResponse(w, r, http.StatusBadRequest, nil, err)
+		return
+	}
+
+	list, err := o.useCase.GetSKUList(r.Context(), domain.SKU(startSkuInt), countInt)
+
+	response.WriteStandardResponse(w, r, http.StatusOK, GetSKUsListResponse{
+		List: list,
+	}, nil)
 }
