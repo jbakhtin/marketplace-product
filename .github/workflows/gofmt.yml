@@ -17,4 +17,15 @@ jobs:
         uses: actions/checkout@v1
 
       - name: Gofmt
-        run: if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then exit 1; fi
+        run: |
+          files="$(gofmt -s -l .)"
+          if [ -n "$files" ]; then
+            echo "gofmt found issues in the following files:"
+            echo "$files"
+            echo
+            echo "Remarks:"
+            gofmt -w .
+            exit 1
+          else
+             echo "gofmt: no issues found"
+          fi
