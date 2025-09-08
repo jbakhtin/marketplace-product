@@ -10,15 +10,19 @@ import (
 )
 
 type Config interface {
-	GetDataBaseDriver() string
-	GetDataBaseDSN() string
+	GetDbDriver() string
+	GetDbHost() string
+	GetDbPort() string
+	GetDbName() string
+	GetDbUser() string
+	GetDbPassword() string
 }
 
 //go:embed migrations/*.sql
 var EmbedMigrations embed.FS
 
 func NewSQLClient(cfg Config) (*sql.DB, error) {
-	db, err := sql.Open(cfg.GetDataBaseDriver(), cfg.GetDataBaseDSN())
+	db, err := sql.Open(cfg.GetDbDriver(), getDbDSN(cfg))
 	if err != nil {
 		return nil, errors.Wrap(err, "db open")
 	}
@@ -41,4 +45,8 @@ func NewSQLClient(cfg Config) (*sql.DB, error) {
 	}
 
 	return db, nil
+}
+
+func getDbDSN(cfg Config) string {
+	return "postgres://" + cfg.GetDbUser() + ":" + cfg.GetDbPassword() + "@" + cfg.GetDbHost() + ":" + cfg.GetDbPort() + "/" + cfg.GetDbName()
 }
