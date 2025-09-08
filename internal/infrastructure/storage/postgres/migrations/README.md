@@ -5,5 +5,5 @@
 
 Краткая инструкция:
 1. Из корневой директории вызовите команду генерации файла:
-   goose -dir=internal/server/database/postgres/migrations create НАЗВАНИЕ_МИГРАЦИИ sql
+   goose `-dir=internal/infrastructure/storage/postgres/migrations` create НАЗВАНИЕ_МИГРАЦИИ sql
 2. Миграции отработает автоматически при страте/перезапуске приложения

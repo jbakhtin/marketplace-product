@@ -1,9 +1,11 @@
+# IDE
 .idea
 
 # Build artifacts
 build/
-*.so
-*.dylib
+
+# Test artifacts
+/coverage.txt
 
 # Environment files
 .env

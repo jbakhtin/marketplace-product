@@ -1,5 +1,4 @@
 name: Gofmt
-
 on:
   pull_request:
     branches:
@@ -7,15 +6,12 @@ on:
   push:
     branches:
       - '**'
-
 jobs:
   gofmt:
     runs-on: ubuntu-latest
-    container: golang:1.21
     steps:
       - name: Checkout code
         uses: actions/checkout@v1
-
       - name: Gofmt
         run: |
           files="$(gofmt -s -l .)"

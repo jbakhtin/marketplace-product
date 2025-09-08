@@ -1,21 +1,22 @@
 services:
 
-  database:
+  marketplace_product_db:
     image: postgres
     restart: always
-    ports:
-      - 5432:5432
+    env_file:
+      - .env
     environment:
-      - HOST=host.docker.internal
-      - POSTGRES_PASSWORD=marketplace_product
-      - POSTGRES_USER=marketplace_product
-      - POSTGRES_DB=marketplace_product
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    ports:
+      - ${DB_PORT}:5432
 
   adminer:
     image: adminer
     restart: always
     ports:
-      - 8080:8080
+      - ${DB_UI_PORT}:8080
 
   server:
     restart: always
@@ -25,4 +26,4 @@ services:
     env_file:
       - .env
     ports:
-      - 8000:8000
+      - ${WEBSERVER_REST_PORT}:8000

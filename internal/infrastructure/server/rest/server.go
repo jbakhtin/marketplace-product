@@ -16,7 +16,8 @@ type Server struct {
 }
 
 type Config interface {
-	GetServerHTTPAddress() string
+	GetWebServerRestHost() string
+	GetWebServerRestPort() string
 	GetAppKey() string
 }
 
@@ -33,7 +34,7 @@ func NewWebServer(
 	return Server{
 		logger: logger,
 		Server: http.Server{
-			Addr:    cfg.GetServerHTTPAddress(),
+			Addr:    cfg.GetWebServerRestHost() + ":" + cfg.GetWebServerRestPort(),
 			Handler: handler,
 		},
 	}, nil
