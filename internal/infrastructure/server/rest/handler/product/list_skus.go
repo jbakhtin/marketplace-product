@@ -39,6 +39,10 @@ func (o *Handler) List(w http.ResponseWriter, r *http.Request) {
 	}
 
 	list, err := o.useCase.GetSKUList(r.Context(), domain.SKU(startSkuInt), countInt)
+	if err != nil {
+		response.WriteStandardResponse(w, r, http.StatusBadRequest, nil, err)
+		return
+	}
 
 	response.WriteStandardResponse(w, r, http.StatusOK, GetSKUsListResponse{
 		List: list,

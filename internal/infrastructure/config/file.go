@@ -9,8 +9,7 @@ type Config struct {
 	}
 	WebServer struct {
 		REST struct {
-			Host string `env:"WEBSERVER_REST_HOST"`
-			Port string `env:"WEBSERVER_REST_PORT"`
+			Address string `env:"WEBSERVER_REST_ADDRESS"`
 		}
 	}
 	Logger struct {
@@ -35,12 +34,8 @@ func NewConfig() (Config, error) {
 	return cfg, nil
 }
 
-func (c *Config) GetWebServerRestHost() string {
-	return c.WebServer.REST.Host
-}
-
-func (c *Config) GetWebServerRestPort() string {
-	return c.WebServer.REST.Port
+func (c *Config) GetWebServerRestAddress() string {
+	return c.WebServer.REST.Address
 }
 
 func (c *Config) GetAppKey() string {

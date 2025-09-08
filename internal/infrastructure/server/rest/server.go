@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"time"
 
 	router "github.com/jbakhtin/marketplace-product/internal/infrastructure/server/rest/router/chi"
 	"github.com/jbakhtin/marketplace-product/internal/modules/product"
@@ -16,8 +17,7 @@ type Server struct {
 }
 
 type Config interface {
-	GetWebServerRestHost() string
-	GetWebServerRestPort() string
+	GetWebServerRestAddress() string
 	GetAppKey() string
 }
 
@@ -34,8 +34,12 @@ func NewWebServer(
 	return Server{
 		logger: logger,
 		Server: http.Server{
-			Addr:    cfg.GetWebServerRestHost() + ":" + cfg.GetWebServerRestPort(),
-			Handler: handler,
+			Addr:              cfg.GetWebServerRestAddress(),
+			Handler:           handler,
+			ReadHeaderTimeout: 5 * time.Second,
+			ReadTimeout:       10 * time.Second,
+			WriteTimeout:      15 * time.Second,
+			IdleTimeout:       60 * time.Second,
 		},
 	}, nil
 }
