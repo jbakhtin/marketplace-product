@@ -42,7 +42,7 @@ func NewRouter(
 
 	// product routes with auth middleware
 	//authMiddleware := custommiddleware.NewAuthMiddleware(cfg)
-	router.Route("/product", func(r chi.Router) {
+	router.Route("/products", func(r chi.Router) {
 		//r.Use(authMiddleware.Auth)
 		r.Get("/get", productHandler.Get)
 		r.Get("/list", productHandler.List)

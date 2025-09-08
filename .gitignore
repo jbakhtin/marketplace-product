@@ -9,3 +9,6 @@ build/
 
 # Environment files
 .env
+
+# Other
+IMPROVEMENTS.md
