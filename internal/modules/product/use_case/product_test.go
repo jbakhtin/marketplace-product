@@ -9,46 +9,22 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 
+	mockLogger "github.com/jbakhtin/marketplace-product/internal/infrastructure/logger/mock"
 	mockRepo "github.com/jbakhtin/marketplace-product/internal/infrastructure/storage/mock"
 	"github.com/jbakhtin/marketplace-product/internal/modules/product/domain"
 )
-
-// MockLogger для тестов
-type MockLogger struct {
-	mock.Mock
-}
-
-func (m *MockLogger) Debug(msg string, fields ...any) {
-	m.Called(msg, fields)
-}
-
-func (m *MockLogger) Info(msg string, fields ...any) {
-	m.Called(msg, fields)
-}
-
-func (m *MockLogger) Warn(msg string, fields ...any) {
-	m.Called(msg, fields)
-}
-
-func (m *MockLogger) Error(msg string, fields ...any) {
-	m.Called(msg, fields)
-}
-
-func (m *MockLogger) Fatal(msg string, fields ...any) {
-	m.Called(msg, fields)
-}
 
 // TestSuite для группировки тестов
 type ProductUseCaseTestSuite struct {
 	suite.Suite
 	useCase    *ProductUseCase
 	mockRepo   *mockRepo.ProductRepository
-	mockLogger *MockLogger
+	mockLogger *mockLogger.MockLogger
 }
 
 func (suite *ProductUseCaseTestSuite) SetupTest() {
 	suite.mockRepo = new(mockRepo.ProductRepository)
-	suite.mockLogger = new(MockLogger)
+	suite.mockLogger = new(mockLogger.MockLogger)
 	suite.useCase = &ProductUseCase{
 		logger:            suite.mockLogger,
 		productRepository: suite.mockRepo,
@@ -251,7 +227,7 @@ func TestProductUseCase_GetProductBySKU_EdgeCases(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// Arrange
 			mockRepo := new(mockRepo.ProductRepository)
-			mockLogger := new(MockLogger)
+			mockLogger := new(mockLogger.MockLogger)
 
 			mockRepo.On("GetProductBySKU", mock.Anything, tt.sku).
 				Return(tt.repoReturn, tt.repoError).
@@ -323,7 +299,7 @@ func TestProductUseCase_GetSKUList_EdgeCases(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// Arrange
 			mockRepo := new(mockRepo.ProductRepository)
-			mockLogger := new(MockLogger)
+			mockLogger := new(mockLogger.MockLogger)
 
 			mockRepo.On("GetSKUList", mock.Anything, tt.startSKU, tt.count).
 				Return(tt.repoReturn, tt.repoError).
