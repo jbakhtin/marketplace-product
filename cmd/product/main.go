@@ -51,15 +51,13 @@ func init() {
 	starterBuilder := starter.New()
 	closerBuilder := closer.New()
 
-	// Добавляем закрытие БД в closer
 	closerBuilder.Add(func(ctx context.Context) error {
 		return db.Close()
 	})
 
-	// Создаем репозиторий с подключением к БД
-	productStorage := repositories.NewProductStorage(db)
+	productRepository := repositories.NewProductRepository(db)
 
-	productModule, err := product.InitModule(logger, productStorage)
+	productModule, err := product.InitModule(logger, productRepository)
 	if err != nil {
 		log.Fatal(err)
 	}
