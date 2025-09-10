@@ -30,6 +30,7 @@ DB_NAME=                #имя БД
 make build  # Сборка контейнеров
 make start  # Запуск docker compose (в фоне)
 make stop   # Остановка docker compose
+make test   # Запуск тестов
 ```
 
 После `make start` приложение поднимется, применит миграции и будет доступно на адресе из 
