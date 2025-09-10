@@ -11,17 +11,17 @@ import (
 	"github.com/pkg/errors"
 )
 
-type ProductStorage struct {
+type ProductRepository struct {
 	db *sql.DB
 }
 
-func NewProductStorage(db *sql.DB) ports.ProductRepository {
-	return &ProductStorage{
+func NewProductRepository(db *sql.DB) ports.ProductRepository {
+	return &ProductRepository{
 		db: db,
 	}
 }
 
-func (p *ProductStorage) GetProductBySKU(ctx context.Context, SKU domain.SKU) (domain.Product, error) {
+func (p *ProductRepository) GetProductBySKU(ctx context.Context, SKU domain.SKU) (domain.Product, error) {
 	var product entities.Product
 
 	err := p.db.QueryRowContext(ctx, query.GetBySKU, SKU).Scan(
@@ -43,7 +43,7 @@ func (p *ProductStorage) GetProductBySKU(ctx context.Context, SKU domain.SKU) (d
 	return product.ToModel(), nil
 }
 
-func (p *ProductStorage) GetSKUList(ctx context.Context, startAfterSKU domain.SKU, count int) ([]domain.SKU, error) {
+func (p *ProductRepository) GetSKUList(ctx context.Context, startAfterSKU domain.SKU, count int) ([]domain.SKU, error) {
 	rows, err := p.db.QueryContext(ctx, query.GetSKUs, startAfterSKU, count)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get SKU list")
