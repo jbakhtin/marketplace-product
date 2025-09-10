@@ -17,3 +17,7 @@ start:
 stop:
 	@echo "Stopping services ..."
 	$(DOCKER_COMPOSE) down
+
+test:
+	@echo "Run test ..."
+	go test ./...
