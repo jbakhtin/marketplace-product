@@ -11,13 +11,13 @@ type Config interface {
 type Handler struct {
 	cfg     Config
 	log     ports.Logger
-	useCase use_case.ProductUseCase
+	useCase ports.UseCaseInterface
 }
 
 func NewProductHandler(cfg Config, logger ports.Logger, useCase use_case.ProductUseCase) (Handler, error) {
 	return Handler{
 		cfg:     cfg,
 		log:     logger,
-		useCase: useCase,
+		useCase: &useCase,
 	}, nil
 }
