@@ -6,6 +6,11 @@ import (
 	"github.com/jbakhtin/marketplace-product/internal/modules/product/ports"
 )
 
+type UseCaseInterface interface {
+	GetProductBySKU(ctx context.Context, SKU domain.SKU) (domain.Product, error)
+	GetSKUList(ctx context.Context, startSKU domain.SKU, count int) ([]domain.SKU, error)
+}
+
 type ProductUseCase struct {
 	logger            ports.Logger
 	productRepository ports.ProductRepository
