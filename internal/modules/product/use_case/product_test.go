@@ -17,7 +17,7 @@ import (
 // TestSuite для группировки тестов
 type ProductUseCaseTestSuite struct {
 	suite.Suite
-	useCase    *ProductUseCase
+	useCase    ProductUseCase
 	mockRepo   *mockRepo.ProductRepository
 	mockLogger *mockLogger.MockLogger
 }
@@ -25,10 +25,7 @@ type ProductUseCaseTestSuite struct {
 func (suite *ProductUseCaseTestSuite) SetupTest() {
 	suite.mockRepo = new(mockRepo.ProductRepository)
 	suite.mockLogger = new(mockLogger.MockLogger)
-	suite.useCase = &ProductUseCase{
-		logger:            suite.mockLogger,
-		productRepository: suite.mockRepo,
-	}
+	suite.useCase, _ = NewProductUseCase(suite.mockLogger, suite.mockRepo)
 }
 
 func (suite *ProductUseCaseTestSuite) TearDownTest() {

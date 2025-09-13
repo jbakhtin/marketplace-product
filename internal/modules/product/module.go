@@ -6,7 +6,7 @@ import (
 )
 
 type Module struct {
-	productUseCase use_case.ProductUseCase
+	productUseCase use_case.UseCaseInterface
 }
 
 func InitModule(logger ports.Logger, productRepository ports.ProductRepository) (Module, error) {
@@ -16,10 +16,10 @@ func InitModule(logger ports.Logger, productRepository ports.ProductRepository) 
 	}
 
 	return Module{
-		productUseCase: productUseCase,
+		productUseCase: &productUseCase,
 	}, nil
 }
 
-func (m Module) GetProductUseCase() use_case.ProductUseCase {
+func (m Module) GetProductUseCase() use_case.UseCaseInterface {
 	return m.productUseCase
 }

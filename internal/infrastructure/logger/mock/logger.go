@@ -8,21 +8,41 @@ type MockLogger struct {
 }
 
 func (m *MockLogger) Debug(msg string, fields ...any) {
-	m.Called(msg, fields)
+	if len(fields) == 0 {
+		m.Called(msg)
+	} else {
+		m.Called(msg, fields)
+	}
 }
 
 func (m *MockLogger) Info(msg string, fields ...any) {
-	m.Called(msg, fields)
+	if len(fields) == 0 {
+		m.Called(msg)
+	} else {
+		m.Called(msg, fields)
+	}
 }
 
 func (m *MockLogger) Warn(msg string, fields ...any) {
-	m.Called(msg, fields)
+	if len(fields) == 0 {
+		m.Called(msg)
+	} else {
+		m.Called(msg, fields)
+	}
 }
 
 func (m *MockLogger) Error(msg string, fields ...any) {
-	m.Called(msg, fields)
+	if len(fields) == 0 {
+		m.Called(msg)
+	} else {
+		m.Called(msg, fields)
+	}
 }
 
 func (m *MockLogger) Fatal(msg string, fields ...any) {
-	m.Called(msg, fields)
+	if len(fields) == 0 {
+		m.Called(msg)
+	} else {
+		m.Called(msg, fields)
+	}
 }

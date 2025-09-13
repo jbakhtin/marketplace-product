@@ -17,7 +17,7 @@ type Config interface {
 func NewRouter(
 	cfg Config,
 	logger ports.Logger,
-	productUseCase use_case.ProductUseCase,
+	productUseCase use_case.UseCaseInterface,
 ) (*chi.Mux, error) {
 	productHandler, err := product.NewProductHandler(cfg, logger, productUseCase)
 	if err != nil {
