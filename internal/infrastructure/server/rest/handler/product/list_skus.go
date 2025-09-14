@@ -2,6 +2,7 @@ package product
 
 import (
 	"errors"
+	"github.com/go-playground/validator/v10"
 	"github.com/jbakhtin/marketplace-product/internal/modules/product/domain"
 	"net/http"
 	"strconv"
@@ -9,42 +10,67 @@ import (
 	"github.com/jbakhtin/marketplace-product/internal/infrastructure/server/rest/handler/response"
 )
 
-type GetSKUsListResponse struct {
-	List []domain.SKU
+type GetSKUsListRequest struct {
+	StartAfterSKU string `validate:"required,numeric"`
+	Count         string `validate:"required,numeric"`
 }
 
-func (o *Handler) List(w http.ResponseWriter, r *http.Request) {
-	startSkuParam := r.URL.Query().Get("start_sku")
-	if startSkuParam == "" {
-		response.WriteStandardResponse(w, r, http.StatusBadRequest, nil, errors.New("empty start_sku param"))
+type GetSKUsListResponse struct {
+	SKUs []domain.SKU `json:"skus,omitempty"`
+}
+
+func (o *Handler) GetListSKUs(w http.ResponseWriter, r *http.Request) {
+	req := GetSKUsListRequest{
+		StartAfterSKU: r.URL.Query().Get("start_after_sku"),
+		Count:         r.URL.Query().Get("count"),
+	}
+
+	validate := validator.New()
+	if err := validate.Struct(req); err != nil {
+		response.WriteStandardResponse(w, r, http.StatusBadRequest, nil,
+			errors.New("validation failed: "+err.Error()))
 		return
 	}
 
-	startSkuInt, err := strconv.Atoi(startSkuParam)
+	startAfterSKUInt, err := strconv.Atoi(req.StartAfterSKU)
 	if err != nil {
 		response.WriteStandardResponse(w, r, http.StatusBadRequest, nil, err)
 		return
 	}
 
-	countParam := r.URL.Query().Get("count")
-	if countParam == "" {
-		response.WriteStandardResponse(w, r, http.StatusBadRequest, nil, errors.New("empty count param"))
-		return
-	}
-
-	countInt, err := strconv.Atoi(countParam)
+	err = validateSKUParam(domain.SKU(startAfterSKUInt))
 	if err != nil {
 		response.WriteStandardResponse(w, r, http.StatusBadRequest, nil, err)
 		return
 	}
 
-	list, err := o.useCase.GetSKUList(r.Context(), domain.SKU(startSkuInt), countInt)
+	countInt, err := strconv.Atoi(req.Count)
 	if err != nil {
 		response.WriteStandardResponse(w, r, http.StatusBadRequest, nil, err)
+		return
+	}
+
+	err = validateCountParam(startAfterSKUInt)
+	if err != nil {
+		response.WriteStandardResponse(w, r, http.StatusBadRequest, nil, err)
+		return
+	}
+
+	listSKUs, err := o.useCase.GetSKUList(r.Context(), domain.SKU(startAfterSKUInt), countInt)
+	if err != nil {
+		response.WriteStandardResponse(w, r, http.StatusInternalServerError, nil, err)
 		return
 	}
 
 	response.WriteStandardResponse(w, r, http.StatusOK, GetSKUsListResponse{
-		List: list,
+		SKUs: listSKUs,
 	}, nil)
+}
+
+func validateCountParam(count int) error {
+	if count <= 0 {
+		return errors.New("count parameter does nt satisfy the check for min value")
+	}
+
+	return nil
 }

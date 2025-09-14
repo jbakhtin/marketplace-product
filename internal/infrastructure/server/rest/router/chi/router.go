@@ -45,7 +45,7 @@ func NewRouter(
 	router.Route("/products", func(r chi.Router) {
 		//r.Use(authMiddleware.Auth)
 		r.Get("/get", productHandler.Get)
-		r.Get("/list", productHandler.List)
+		r.Get("/list", productHandler.GetListSKUs)
 	})
 
 	return router, nil
