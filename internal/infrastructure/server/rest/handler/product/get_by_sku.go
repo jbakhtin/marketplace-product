@@ -1,9 +1,10 @@
 package product
 
 import (
-	"github.com/go-playground/validator/v10"
 	"net/http"
 	"strconv"
+
+	"github.com/go-playground/validator/v10"
 
 	"github.com/jbakhtin/marketplace-product/internal/infrastructure/server/rest/handler/response"
 	"github.com/jbakhtin/marketplace-product/internal/modules/product/domain"
@@ -11,7 +12,7 @@ import (
 )
 
 type GetProductRequest struct {
-	SKU string `validate:"required,numeric,min=0"`
+	SKU string `validate:"required,numeric"`
 }
 
 type GetProductBySKUResponse struct {
@@ -35,14 +36,28 @@ func (o *Handler) Get(w http.ResponseWriter, r *http.Request) {
 		response.WriteStandardResponse(w, r, http.StatusBadRequest, nil, err)
 	}
 
+	err = validateSKUParam(domain.SKU(skuInt))
+	if err != nil {
+		response.WriteStandardResponse(w, r, http.StatusBadRequest, nil, err)
+		return
+	}
+
 	product, err := o.useCase.GetProductBySKU(r.Context(), domain.SKU(skuInt))
 	if err != nil {
 		o.log.Error(err.Error())
-		response.WriteStandardResponse(w, r, http.StatusBadRequest, nil, err)
+		response.WriteStandardResponse(w, r, http.StatusInternalServerError, nil, err)
 		return
 	}
 
 	response.WriteStandardResponse(w, r, http.StatusOK, GetProductBySKUResponse{
 		Product: product,
 	}, nil)
+}
+
+func validateSKUParam(sku domain.SKU) error {
+	if sku <= 0 {
+		return errors.New("sku parameter does not satisfy the check for min value")
+	}
+
+	return nil
 }

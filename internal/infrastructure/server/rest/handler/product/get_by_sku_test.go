@@ -88,7 +88,7 @@ func (suite *ProductHandlerTestSuite) TestGet_InvalidSKU() {
 	suite.Equal(http.StatusBadRequest, w.Code)
 }
 
-func (suite *ProductHandlerTestSuite) TestGet_RepositoryError() {
+func (suite *ProductHandlerTestSuite) TestGet_UseCaseError() {
 	// Arrange
 	expectedSKU := domain.SKU(999)
 	expectedError := errors.New("product not found")
@@ -105,51 +105,27 @@ func (suite *ProductHandlerTestSuite) TestGet_RepositoryError() {
 	suite.handler.Get(w, req)
 
 	// Assert
-	suite.Equal(http.StatusBadRequest, w.Code)
+	suite.Equal(http.StatusInternalServerError, w.Code)
 }
 
 func (suite *ProductHandlerTestSuite) TestGet_ZeroSKU() {
-	// Arrange
-	expectedSKU := domain.SKU(0)
-	expectedProduct := domain.Product{
-		SKU:   expectedSKU,
-		Name:  "Zero Product",
-		Price: 0,
-	}
-
-	suite.mockUseCase.On("GetProductBySKU", mock.Anything, expectedSKU).
-		Return(expectedProduct, nil).
-		Once()
-
 	// Act
 	req := httptest.NewRequest("GET", "/product/get?sku=0", nil)
 	w := httptest.NewRecorder()
 	suite.handler.Get(w, req)
 
 	// Assert
-	suite.Equal(http.StatusOK, w.Code)
+	suite.Equal(http.StatusBadRequest, w.Code)
 }
 
 func (suite *ProductHandlerTestSuite) TestGet_NegativeSKU() {
-	// Arrange
-	expectedSKU := domain.SKU(-1)
-	expectedProduct := domain.Product{
-		SKU:   expectedSKU,
-		Name:  "Negative Product",
-		Price: 100,
-	}
-
-	suite.mockUseCase.On("GetProductBySKU", mock.Anything, expectedSKU).
-		Return(expectedProduct, nil).
-		Once()
-
 	// Act
 	req := httptest.NewRequest("GET", "/product/get?sku=-1", nil)
 	w := httptest.NewRecorder()
 	suite.handler.Get(w, req)
 
 	// Assert
-	suite.Equal(http.StatusOK, w.Code)
+	suite.Equal(http.StatusBadRequest, w.Code)
 }
 
 // Запуск test suite
