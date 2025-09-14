@@ -1,10 +1,11 @@
 package product
 
 import (
-	"github.com/jbakhtin/marketplace-product/internal/infrastructure/mock/product"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/jbakhtin/marketplace-product/internal/infrastructure/mock/product"
 
 	mockLogger "github.com/jbakhtin/marketplace-product/internal/infrastructure/logger/mock"
 	mockUseCase "github.com/jbakhtin/marketplace-product/internal/infrastructure/mock/product"
@@ -35,97 +36,86 @@ func (suite *ProductHandlerTestSuite) TearDownTest() {
 	suite.mockUseCase.AssertExpectations(suite.T())
 }
 
-// Тесты для GetProductBySKU
-func (suite *ProductHandlerTestSuite) TestGet_Success() {
-	// Arrange
-	expectedSKU := domain.SKU(123)
-	expectedProduct := domain.Product{
-		SKU:   expectedSKU,
-		Name:  "Test Product",
-		Price: 1000,
+func (suite *ProductHandlerTestSuite) TestGet_CheckRequestValidation() {
+	for _, testCase := range []struct {
+		name              string
+		routeParam        string
+		expectedStatus    int
+		shouldUseCase     bool
+		useCaseFirstParam domain.SKU
+		useCaseResponse   domain.Product
+		useCaseErr        error
+	}{
+		{
+			name:              "success",
+			routeParam:        "sku=123",
+			expectedStatus:    http.StatusOK,
+			shouldUseCase:     true,
+			useCaseFirstParam: domain.SKU(123),
+			useCaseResponse:   domain.Product{SKU: 123, Name: "Test Product", Price: 1000},
+			useCaseErr:        nil,
+		},
+		{
+			name:           "empty sku",
+			routeParam:     "sku=",
+			expectedStatus: http.StatusBadRequest,
+			shouldUseCase:  false,
+		},
+		{
+			name:           "missing sku",
+			routeParam:     "",
+			expectedStatus: http.StatusBadRequest,
+			shouldUseCase:  false,
+		},
+		{
+			name:           "missing sku",
+			routeParam:     "",
+			expectedStatus: http.StatusBadRequest,
+			shouldUseCase:  false,
+		},
+		{
+			name:           "invalid sku",
+			routeParam:     "sku=abc",
+			expectedStatus: http.StatusBadRequest,
+			shouldUseCase:  false,
+		},
+		{
+			name:           "negative sku",
+			routeParam:     "sku=-1",
+			expectedStatus: http.StatusBadRequest,
+			shouldUseCase:  false,
+		},
+		{
+			name:              "use case error",
+			routeParam:        "sku=10",
+			expectedStatus:    http.StatusInternalServerError,
+			shouldUseCase:     true,
+			useCaseFirstParam: domain.SKU(10),
+			useCaseResponse:   domain.Product{},
+			useCaseErr:        errors.New("use case error"),
+		},
+	} {
+		suite.T().Run(testCase.name, func(t *testing.T) {
+			if testCase.shouldUseCase {
+				suite.mockUseCase.
+					On("GetProductBySKU", mock.Anything, testCase.useCaseFirstParam).
+					Return(testCase.useCaseResponse, testCase.useCaseErr).
+					Once()
+			}
+
+			if testCase.useCaseErr != nil {
+				suite.mockLogger.
+					On("Error", testCase.useCaseErr.Error()).
+					Return().
+					Once()
+			}
+
+			req := httptest.NewRequest("GET", "/product/get?"+testCase.routeParam, nil)
+			w := httptest.NewRecorder()
+			suite.handler.Get(w, req)
+			suite.Equal(testCase.expectedStatus, w.Code)
+		})
 	}
-
-	suite.mockUseCase.On("GetProductBySKU", mock.Anything, expectedSKU).
-		Return(expectedProduct, nil).
-		Once()
-
-	// Act
-	req := httptest.NewRequest("GET", "/product/get?sku=123", nil)
-	w := httptest.NewRecorder()
-	suite.handler.Get(w, req)
-
-	// Assert
-	suite.Equal(http.StatusOK, w.Code)
-}
-
-func (suite *ProductHandlerTestSuite) TestGet_EmptySKU() {
-	// Act - пустой sku параметр
-	req := httptest.NewRequest("GET", "/product/get?sku=", nil)
-	w := httptest.NewRecorder()
-	suite.handler.Get(w, req)
-
-	// Assert
-	suite.Equal(http.StatusBadRequest, w.Code)
-}
-
-func (suite *ProductHandlerTestSuite) TestGet_MissingSKU() {
-	// Act - отсутствует sku параметр
-	req := httptest.NewRequest("GET", "/product/get", nil)
-	w := httptest.NewRecorder()
-	suite.handler.Get(w, req)
-
-	// Assert
-	suite.Equal(http.StatusBadRequest, w.Code)
-}
-
-func (suite *ProductHandlerTestSuite) TestGet_InvalidSKU() {
-	// Act - невалидный sku (не число)
-	req := httptest.NewRequest("GET", "/product/get?sku=abc", nil)
-	w := httptest.NewRecorder()
-	suite.handler.Get(w, req)
-
-	// Assert
-	suite.Equal(http.StatusBadRequest, w.Code)
-}
-
-func (suite *ProductHandlerTestSuite) TestGet_UseCaseError() {
-	// Arrange
-	expectedSKU := domain.SKU(999)
-	expectedError := errors.New("product not found")
-
-	suite.mockUseCase.On("GetProductBySKU", mock.Anything, expectedSKU).
-		Return(domain.Product{}, expectedError).
-		Once()
-
-	suite.mockLogger.On("Error", "product not found").Return().Once()
-
-	// Act
-	req := httptest.NewRequest("GET", "/product/get?sku=999", nil)
-	w := httptest.NewRecorder()
-	suite.handler.Get(w, req)
-
-	// Assert
-	suite.Equal(http.StatusInternalServerError, w.Code)
-}
-
-func (suite *ProductHandlerTestSuite) TestGet_ZeroSKU() {
-	// Act
-	req := httptest.NewRequest("GET", "/product/get?sku=0", nil)
-	w := httptest.NewRecorder()
-	suite.handler.Get(w, req)
-
-	// Assert
-	suite.Equal(http.StatusBadRequest, w.Code)
-}
-
-func (suite *ProductHandlerTestSuite) TestGet_NegativeSKU() {
-	// Act
-	req := httptest.NewRequest("GET", "/product/get?sku=-1", nil)
-	w := httptest.NewRecorder()
-	suite.handler.Get(w, req)
-
-	// Assert
-	suite.Equal(http.StatusBadRequest, w.Code)
 }
 
 // Запуск test suite
