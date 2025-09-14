@@ -6,7 +6,116 @@ import (
 	"github.com/stretchr/testify/mock"
 	"net/http"
 	"net/http/httptest"
+	"testing"
 )
+
+func (suite *ProductHandlerTestSuite) TestGetListSKUs_CheckRequestValidation() {
+	for _, testCase := range []struct {
+		name               string
+		routeParam         string
+		expectedStatus     int
+		shouldUseCase      bool
+		useCaseFirstParam  domain.SKU
+		useCaseSecondParam int
+		useCaseResponse    []domain.SKU
+		useCaseErr         error
+	}{
+		{
+			name:               "valid start_after_sku, valid count",
+			routeParam:         "start_after_sku=123&count=10",
+			expectedStatus:     http.StatusOK,
+			shouldUseCase:      true,
+			useCaseFirstParam:  domain.SKU(123),
+			useCaseSecondParam: 10,
+			useCaseResponse:    []domain.SKU{124, 125, 126, 127, 128, 129, 130, 131, 132, 133},
+			useCaseErr:         nil,
+		},
+		{
+			name:               "use case error",
+			routeParam:         "start_after_sku=123&count=10",
+			expectedStatus:     http.StatusInternalServerError,
+			shouldUseCase:      true,
+			useCaseFirstParam:  domain.SKU(123),
+			useCaseSecondParam: 10,
+			useCaseResponse:    nil,
+			useCaseErr:         errors.New("use case error"),
+		},
+		{
+			name:           "empty start_after_sku, valid count",
+			routeParam:     "start_after_sku=&count=10",
+			expectedStatus: http.StatusBadRequest,
+			shouldUseCase:  false,
+		},
+		{
+			name:           "missing start_after_sku, valid count",
+			routeParam:     "count=10",
+			expectedStatus: http.StatusBadRequest,
+			shouldUseCase:  false,
+		},
+		{
+			name:           "invalid start_after_sku, valid count",
+			routeParam:     "start_after_sku=abc&count=10",
+			expectedStatus: http.StatusBadRequest,
+			shouldUseCase:  false,
+		},
+		{
+			name:           "negative start_after_sku, valid count",
+			routeParam:     "start_after_sku=-1&count=10",
+			expectedStatus: http.StatusBadRequest,
+			shouldUseCase:  false,
+		},
+		{
+			name:           "zero start_after_sku, valid count",
+			routeParam:     "start_after_sku=0&count=10",
+			expectedStatus: http.StatusBadRequest,
+			shouldUseCase:  false,
+		},
+		{
+			name:           "valid start_after_sku, empty count",
+			routeParam:     "start_after_sku=123&count=",
+			expectedStatus: http.StatusBadRequest,
+			shouldUseCase:  false,
+		},
+		{
+			name:           "valid start_after_sku, missing count",
+			routeParam:     "start_after_sku=123",
+			expectedStatus: http.StatusBadRequest,
+			shouldUseCase:  false,
+		},
+		{
+			name:           "valid start_after_sku, invalid count",
+			routeParam:     "start_after_sku=123&count=abc",
+			expectedStatus: http.StatusBadRequest,
+			shouldUseCase:  false,
+		},
+		{
+			name:           "valid start_after_sku, negative count",
+			routeParam:     "start_after_sku=123&count=-1",
+			expectedStatus: http.StatusBadRequest,
+			shouldUseCase:  false,
+		},
+		{
+			name:           "valid start_after_sku, zero count",
+			routeParam:     "start_after_sku=123&count=0",
+			expectedStatus: http.StatusBadRequest,
+			shouldUseCase:  false,
+		},
+	} {
+		suite.T().Run(testCase.name, func(t *testing.T) {
+			if testCase.shouldUseCase {
+				suite.mockUseCase.
+					On("GetSKUList", mock.Anything, testCase.useCaseFirstParam, testCase.useCaseSecondParam).
+					Return(testCase.useCaseResponse, testCase.useCaseErr).
+					Once()
+			}
+
+			req := httptest.NewRequest("GET", "/product/list?"+testCase.routeParam, nil)
+			w := httptest.NewRecorder()
+			suite.handler.GetListSKUs(w, req)
+			suite.Equal(testCase.expectedStatus, w.Code)
+		})
+	}
+}
 
 // Тесты для GetProductBySKU
 func (suite *ProductHandlerTestSuite) TestGetListSKUs_Success() {
