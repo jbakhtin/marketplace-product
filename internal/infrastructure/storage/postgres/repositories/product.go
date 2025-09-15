@@ -35,7 +35,7 @@ func (p *ProductRepository) GetProductBySKU(ctx context.Context, SKU domain.SKU)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return domain.Product{}, errors.New("product not found")
+			return domain.Product{}, domain.NotFound
 		}
 		return domain.Product{}, errors.Wrap(err, "failed to get product by SKU")
 	}
