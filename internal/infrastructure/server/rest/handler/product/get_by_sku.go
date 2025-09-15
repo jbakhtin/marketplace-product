@@ -34,6 +34,7 @@ func (o *Handler) Get(w http.ResponseWriter, r *http.Request) {
 	skuInt, err := strconv.Atoi(req.SKU)
 	if err != nil {
 		response.WriteStandardResponse(w, r, http.StatusBadRequest, nil, err)
+		return
 	}
 
 	err = validateSKUParam(domain.SKU(skuInt))
