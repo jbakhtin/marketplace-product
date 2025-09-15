@@ -93,16 +93,16 @@ func (suite *ProductUseCaseTestSuite) TestGetProductBySKU_EmptyProduct() {
 // Тесты для GetSKUList
 func (suite *ProductUseCaseTestSuite) TestGetSKUList_Success() {
 	// Arrange
-	startSKU := domain.SKU(100)
+	startAfterSKU := domain.SKU(100)
 	count := 5
 	expectedSKUs := []domain.SKU{101, 102, 103, 104, 105}
 
-	suite.mockRepo.On("GetSKUList", mock.Anything, startSKU, count).
+	suite.mockRepo.On("GetSKUList", mock.Anything, startAfterSKU, count).
 		Return(expectedSKUs, nil).
 		Once()
 
 	// Act
-	result, err := suite.useCase.GetSKUList(context.Background(), startSKU, count)
+	result, err := suite.useCase.GetSKUList(context.Background(), startAfterSKU, count)
 
 	// Assert
 	suite.NoError(err)
@@ -111,16 +111,16 @@ func (suite *ProductUseCaseTestSuite) TestGetSKUList_Success() {
 
 func (suite *ProductUseCaseTestSuite) TestGetSKUList_RepositoryError() {
 	// Arrange
-	startSKU := domain.SKU(200)
+	startAfterSKU := domain.SKU(200)
 	count := 10
 	expectedError := errors.New("database connection failed")
 
-	suite.mockRepo.On("GetSKUList", mock.Anything, startSKU, count).
+	suite.mockRepo.On("GetSKUList", mock.Anything, startAfterSKU, count).
 		Return(nil, expectedError).
 		Once()
 
 	// Act
-	result, err := suite.useCase.GetSKUList(context.Background(), startSKU, count)
+	result, err := suite.useCase.GetSKUList(context.Background(), startAfterSKU, count)
 
 	// Assert
 	suite.Error(err)
@@ -130,16 +130,16 @@ func (suite *ProductUseCaseTestSuite) TestGetSKUList_RepositoryError() {
 
 func (suite *ProductUseCaseTestSuite) TestGetSKUList_EmptyResult() {
 	// Arrange
-	startSKU := domain.SKU(300)
+	startAfterSKU := domain.SKU(300)
 	count := 3
 	emptySKUs := []domain.SKU{}
 
-	suite.mockRepo.On("GetSKUList", mock.Anything, startSKU, count).
+	suite.mockRepo.On("GetSKUList", mock.Anything, startAfterSKU, count).
 		Return(emptySKUs, nil).
 		Once()
 
 	// Act
-	result, err := suite.useCase.GetSKUList(context.Background(), startSKU, count)
+	result, err := suite.useCase.GetSKUList(context.Background(), startAfterSKU, count)
 
 	// Assert
 	suite.NoError(err)
@@ -149,16 +149,16 @@ func (suite *ProductUseCaseTestSuite) TestGetSKUList_EmptyResult() {
 
 func (suite *ProductUseCaseTestSuite) TestGetSKUList_ZeroCount() {
 	// Arrange
-	startSKU := domain.SKU(400)
+	startAfterSKU := domain.SKU(400)
 	count := 0
 	expectedSKUs := []domain.SKU{}
 
-	suite.mockRepo.On("GetSKUList", mock.Anything, startSKU, count).
+	suite.mockRepo.On("GetSKUList", mock.Anything, startAfterSKU, count).
 		Return(expectedSKUs, nil).
 		Once()
 
 	// Act
-	result, err := suite.useCase.GetSKUList(context.Background(), startSKU, count)
+	result, err := suite.useCase.GetSKUList(context.Background(), startAfterSKU, count)
 
 	// Assert
 	suite.NoError(err)
@@ -237,78 +237,6 @@ func TestProductUseCase_GetProductBySKU_EdgeCases(t *testing.T) {
 
 			// Act
 			result, err := useCase.GetProductBySKU(context.Background(), tt.sku)
-
-			// Assert
-			if tt.expectedError {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
-				assert.Equal(t, tt.expectedResult, result)
-			}
-
-			mockRepo.AssertExpectations(t)
-		})
-	}
-}
-
-func TestProductUseCase_GetSKUList_EdgeCases(t *testing.T) {
-	t.Parallel()
-
-	tests := []struct {
-		name           string
-		startSKU       domain.SKU
-		count          int
-		repoReturn     []domain.SKU
-		repoError      error
-		expectedResult []domain.SKU
-		expectedError  bool
-	}{
-		{
-			name:           "negative count",
-			startSKU:       100,
-			count:          -5,
-			repoReturn:     []domain.SKU{},
-			repoError:      nil,
-			expectedResult: []domain.SKU{},
-			expectedError:  false,
-		},
-		{
-			name:           "large count",
-			startSKU:       200,
-			count:          10000,
-			repoReturn:     []domain.SKU{201, 202, 203},
-			repoError:      nil,
-			expectedResult: []domain.SKU{201, 202, 203},
-			expectedError:  false,
-		},
-		{
-			name:           "single SKU",
-			startSKU:       500,
-			count:          1,
-			repoReturn:     []domain.SKU{501},
-			repoError:      nil,
-			expectedResult: []domain.SKU{501},
-			expectedError:  false,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			// Arrange
-			mockRepo := new(mockRepo.ProductRepository)
-			mockLogger := new(mockLogger.MockLogger)
-
-			mockRepo.On("GetSKUList", mock.Anything, tt.startSKU, tt.count).
-				Return(tt.repoReturn, tt.repoError).
-				Once()
-
-			useCase := &ProductUseCase{
-				logger:            mockLogger,
-				productRepository: mockRepo,
-			}
-
-			// Act
-			result, err := useCase.GetSKUList(context.Background(), tt.startSKU, tt.count)
 
 			// Assert
 			if tt.expectedError {

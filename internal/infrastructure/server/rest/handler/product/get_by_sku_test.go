@@ -87,6 +87,12 @@ func (suite *ProductHandlerTestSuite) TestGet_CheckRequestValidation() {
 			shouldUseCase:  false,
 		},
 		{
+			name:           "too large sku",
+			routeParam:     "sku=9999999999",
+			expectedStatus: http.StatusBadRequest,
+			shouldUseCase:  false,
+		},
+		{
 			name:              "use case internal error",
 			routeParam:        "sku=10",
 			expectedStatus:    http.StatusInternalServerError,

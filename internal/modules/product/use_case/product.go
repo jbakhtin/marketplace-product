@@ -8,7 +8,7 @@ import (
 
 type UseCaseInterface interface {
 	GetProductBySKU(ctx context.Context, SKU domain.SKU) (domain.Product, error)
-	GetSKUList(ctx context.Context, startSKU domain.SKU, count int) ([]domain.SKU, error)
+	GetSKUList(ctx context.Context, startAfterSKU domain.SKU, count int) ([]domain.SKU, error)
 }
 
 type ProductUseCase struct {
@@ -35,8 +35,8 @@ func (o *ProductUseCase) GetProductBySKU(ctx context.Context, SKU domain.SKU) (d
 	return product, nil
 }
 
-func (o *ProductUseCase) GetSKUList(ctx context.Context, startSKU domain.SKU, count int) ([]domain.SKU, error) {
-	skus, err := o.productRepository.GetSKUList(ctx, startSKU, count)
+func (o *ProductUseCase) GetSKUList(ctx context.Context, startAfterSKU domain.SKU, count int) ([]domain.SKU, error) {
+	skus, err := o.productRepository.GetSKUList(ctx, startAfterSKU, count)
 	if err != nil {
 		return nil, err
 	}
