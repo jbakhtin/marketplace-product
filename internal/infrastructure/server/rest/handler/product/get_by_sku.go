@@ -1,6 +1,7 @@
 package product
 
 import (
+	"math"
 	"net/http"
 	"strconv"
 
@@ -63,7 +64,9 @@ func (o *Handler) Get(w http.ResponseWriter, r *http.Request) {
 
 func validateSKUParam(sku domain.SKU) error {
 	if sku <= 0 {
-		return errors.New("sku parameter does not satisfy the check for min value")
+		return errors.New("sku must be positive")
+	} else if sku > math.MaxInt32 {
+		return errors.New("sku is too large")
 	}
 
 	return nil

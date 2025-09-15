@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/go-playground/validator/v10"
 	"github.com/jbakhtin/marketplace-product/internal/modules/product/domain"
+	"math"
 	"net/http"
 	"strconv"
 
@@ -69,7 +70,9 @@ func (o *Handler) GetListSKUs(w http.ResponseWriter, r *http.Request) {
 
 func validateCountParam(count int) error {
 	if count <= 0 {
-		return errors.New("count parameter does not satisfy the check for min value")
+		return errors.New("count must be positive")
+	} else if count > math.MaxInt32 {
+		return errors.New("count is too large")
 	}
 
 	return nil
