@@ -104,7 +104,6 @@ func (suite *ProductHandlerTestSuite) TestGet_CheckRequestValidation() {
 			useCaseFirstParam: domain.SKU(10),
 			useCaseResponse:   domain.Product{},
 			useCaseErr:        domain.NotFound,
-			shouldLogger:      true,
 		},
 	} {
 		suite.T().Run(testCase.name, func(t *testing.T) {
