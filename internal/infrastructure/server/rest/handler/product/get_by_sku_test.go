@@ -45,6 +45,7 @@ func (suite *ProductHandlerTestSuite) TestGet_CheckRequestValidation() {
 		useCaseFirstParam domain.SKU
 		useCaseResponse   domain.Product
 		useCaseErr        error
+		shouldLogger      bool
 	}{
 		{
 			name:              "success",
@@ -86,13 +87,24 @@ func (suite *ProductHandlerTestSuite) TestGet_CheckRequestValidation() {
 			shouldUseCase:  false,
 		},
 		{
-			name:              "use case error",
+			name:              "use case internal error",
 			routeParam:        "sku=10",
 			expectedStatus:    http.StatusInternalServerError,
 			shouldUseCase:     true,
 			useCaseFirstParam: domain.SKU(10),
 			useCaseResponse:   domain.Product{},
-			useCaseErr:        errors.New("use case error"),
+			useCaseErr:        errors.New("use case internal error"),
+			shouldLogger:      true,
+		},
+		{
+			name:              "product not found",
+			routeParam:        "sku=10",
+			expectedStatus:    http.StatusNotFound,
+			shouldUseCase:     true,
+			useCaseFirstParam: domain.SKU(10),
+			useCaseResponse:   domain.Product{},
+			useCaseErr:        domain.NotFound,
+			shouldLogger:      true,
 		},
 	} {
 		suite.T().Run(testCase.name, func(t *testing.T) {
@@ -103,7 +115,7 @@ func (suite *ProductHandlerTestSuite) TestGet_CheckRequestValidation() {
 					Once()
 			}
 
-			if testCase.useCaseErr != nil {
+			if testCase.shouldLogger {
 				suite.mockLogger.
 					On("Error", testCase.useCaseErr.Error()).
 					Return().

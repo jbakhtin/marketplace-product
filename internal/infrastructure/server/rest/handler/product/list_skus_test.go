@@ -19,6 +19,7 @@ func (suite *ProductHandlerTestSuite) TestGetListSKUs_CheckRequestValidation() {
 		useCaseSecondParam int
 		useCaseResponse    []domain.SKU
 		useCaseErr         error
+		shouldLogger       bool
 	}{
 		{
 			name:               "valid start_after_sku, valid count",
