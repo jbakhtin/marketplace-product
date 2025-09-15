@@ -44,7 +44,13 @@ func (o *Handler) Get(w http.ResponseWriter, r *http.Request) {
 
 	product, err := o.useCase.GetProductBySKU(r.Context(), domain.SKU(skuInt))
 	if err != nil {
+		if errors.Is(err, domain.NotFound) {
+			response.WriteStandardResponse(w, r, http.StatusNotFound, nil, err)
+			return
+		}
+
 		o.log.Error(err.Error())
+
 		response.WriteStandardResponse(w, r, http.StatusInternalServerError, nil, err)
 		return
 	}
