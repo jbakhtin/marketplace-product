@@ -72,6 +72,12 @@ func (suite *ProductHandlerTestSuite) TestGetListSKUs_CheckRequestValidation() {
 			shouldUseCase:  false,
 		},
 		{
+			name:           "too large start_after_sku, valid count",
+			routeParam:     "start_after_sku=9999999999&count=10",
+			expectedStatus: http.StatusBadRequest,
+			shouldUseCase:  false,
+		},
+		{
 			name:           "valid start_after_sku, empty count",
 			routeParam:     "start_after_sku=123&count=",
 			expectedStatus: http.StatusBadRequest,
@@ -98,6 +104,12 @@ func (suite *ProductHandlerTestSuite) TestGetListSKUs_CheckRequestValidation() {
 		{
 			name:           "valid start_after_sku, zero count",
 			routeParam:     "start_after_sku=123&count=0",
+			expectedStatus: http.StatusBadRequest,
+			shouldUseCase:  false,
+		},
+		{
+			name:           "valid start_after_sku, too large count",
+			routeParam:     "start_after_sku=123&count=9999999999",
 			expectedStatus: http.StatusBadRequest,
 			shouldUseCase:  false,
 		},

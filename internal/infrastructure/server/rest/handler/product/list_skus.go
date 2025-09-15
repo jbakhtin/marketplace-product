@@ -39,7 +39,7 @@ func (o *Handler) GetListSKUs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = validateSKUParam(domain.SKU(startAfterSKUInt))
+	err = validateSKUParam(startAfterSKUInt)
 	if err != nil {
 		response.WriteStandardResponse(w, r, http.StatusBadRequest, nil, err)
 		return
