@@ -69,7 +69,7 @@ func (o *Handler) GetListSKUs(w http.ResponseWriter, r *http.Request) {
 
 func validateCountParam(count int) error {
 	if count <= 0 {
-		return errors.New("count parameter does nt satisfy the check for min value")
+		return errors.New("count parameter does not satisfy the check for min value")
 	}
 
 	return nil
