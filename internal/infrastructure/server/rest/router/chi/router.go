@@ -5,7 +5,11 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	openapi "github.com/jbakhtin/marketplace-product/internal/infrastructure/server/rest/openapi/v1"
 	"github.com/jbakhtin/marketplace-product/internal/infrastructure/server/rest/handler/product"
+	"github.com/jbakhtin/marketplace-product/internal/infrastructure/server/rest/response"
+	swagger "github.com/jbakhtin/marketplace-product/internal/infrastructure/server/rest/handler/swagger"
+	custommiddleware "github.com/jbakhtin/marketplace-product/internal/infrastructure/server/rest/middleware"
 	"github.com/jbakhtin/marketplace-product/internal/modules/product/ports"
 	"github.com/jbakhtin/marketplace-product/internal/modules/product/use_case"
 )
@@ -24,13 +28,17 @@ func NewRouter(
 		return nil, err
 	}
 
+	openAPIValidator, err := custommiddleware.NewOpenAPIValidator()
+	if err != nil {
+		return nil, err
+	}
+
 	router := chi.NewRouter()
 
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.RequestID)
 	router.Use(middleware.URLFormat)
 
-	// health endpoints (no auth)
 	router.Get("/healthz", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte("ok"))
@@ -40,12 +48,16 @@ func NewRouter(
 		_, _ = w.Write([]byte("ready"))
 	})
 
-	// product routes with auth middleware
-	//authMiddleware := custommiddleware.NewAuthMiddleware(cfg)
-	router.Route("/products", func(r chi.Router) {
-		//r.Use(authMiddleware.Auth)
-		r.Get("/get", productHandler.Get)
-		r.Get("/list", productHandler.GetListSKUs)
+	swagger.RegisterRoutes(router)
+
+	router.Group(func(r chi.Router) {
+		r.Use(openAPIValidator)
+		openapi.HandlerWithOptions(productHandler, openapi.ChiServerOptions{
+			BaseRouter: r,
+			ErrorHandlerFunc: func(w http.ResponseWriter, r *http.Request, err error) {
+				response.Write(w, http.StatusBadRequest, nil, err)
+			},
+		})
 	})
 
 	return router, nil

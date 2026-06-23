@@ -1,0 +1,217 @@
+openapi: 3.0.3
+info:
+  title: Marketplace Product Service
+  description: REST API сервиса продуктов маркетплейса
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8000
+    description: Local development
+
+tags:
+  - name: products
+    description: Операции с продуктами
+
+paths:
+  /products/get:
+    get:
+      tags: [products]
+      summary: Получить продукт по SKU
+      operationId: getProductBySKU
+      parameters:
+        - $ref: "#/components/parameters/sku"
+      responses:
+        "200":
+          description: Продукт найден
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/GetProductBySKUResponse"
+              example:
+                success: true
+                status: 200
+                data:
+                  product:
+                    Name: "Test Product"
+                    SKU: 123
+                    Price: 1000
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /products/list:
+    get:
+      tags: [products]
+      summary: Получить список SKU
+      description: Возвращает список SKU, начиная после указанного значения.
+      operationId: listProductSKUs
+      parameters:
+        - name: start_after_sku
+          in: query
+          required: true
+          description: SKU, после которого начинается выборка (должен быть > 0)
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+          example: 123
+        - name: count
+          in: query
+          required: true
+          description: Количество SKU в ответе (должно быть > 0)
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+          example: 10
+      responses:
+        "200":
+          description: Список SKU
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/GetSKUsListResponse"
+              example:
+                success: true
+                status: 200
+                data:
+                  skus: [124, 125, 126]
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+components:
+  parameters:
+    sku:
+      name: sku
+      in: query
+      required: true
+      description: Артикул продукта (должен быть > 0)
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+      example: 123
+
+  schemas:
+    SuccessResponse:
+      type: object
+      required: [success, status]
+      properties:
+        success:
+          type: boolean
+          example: true
+        status:
+          type: integer
+          example: 200
+        data:
+          type: object
+          x-go-type: json.RawMessage
+
+    ErrorResponse:
+      type: object
+      required: [success, status, error]
+      properties:
+        success:
+          type: boolean
+          example: false
+        status:
+          type: integer
+          example: 400
+        error:
+          $ref: "#/components/schemas/Error"
+
+    Error:
+      type: object
+      required: [title]
+      properties:
+        type:
+          type: string
+        title:
+          type: string
+        detail:
+          type: string
+        instance:
+          type: string
+
+    Product:
+      type: object
+      properties:
+        Name:
+          type: string
+          example: "Test Product"
+        SKU:
+          type: integer
+          format: int32
+          example: 123
+        Price:
+          type: integer
+          format: int32
+          example: 1000
+
+    GetProductBySKUResponse:
+      type: object
+      required: [product]
+      properties:
+        product:
+          $ref: "#/components/schemas/Product"
+
+    GetSKUsListResponse:
+      type: object
+      properties:
+        skus:
+          type: array
+          items:
+            type: integer
+            format: int32
+
+  responses:
+    BadRequest:
+      description: Ошибка валидации запроса
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            success: false
+            status: 400
+            error:
+              title: "validation failed: Key: 'GetProductRequest.SKU' Error:Field validation for 'SKU' failed on the 'required' tag"
+
+    NotFound:
+      description: Продукт не найден
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            success: false
+            status: 404
+            error:
+              title: product not found
+
+    InternalServerError:
+      description: Внутренняя ошибка сервера
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            success: false
+            status: 500
+            error:
+              title: internal server error

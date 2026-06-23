@@ -2,13 +2,10 @@ package product
 
 import (
 	"net/http"
-	"net/http/httptest"
 	"testing"
 
-	"github.com/jbakhtin/marketplace-product/internal/infrastructure/mock/product"
-
 	mockLogger "github.com/jbakhtin/marketplace-product/internal/infrastructure/logger/mock"
-	mockUseCase "github.com/jbakhtin/marketplace-product/internal/infrastructure/mock/product"
+	"github.com/jbakhtin/marketplace-product/internal/infrastructure/mock/product"
 	"github.com/jbakhtin/marketplace-product/internal/modules/product/domain"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/mock"
@@ -17,11 +14,10 @@ import (
 
 type MockConfig struct{}
 
-// TestSuite для группировки тестов
 type ProductHandlerTestSuite struct {
 	suite.Suite
-	handler     Handler
-	mockUseCase *mockUseCase.MockProductService
+	handler     *Handler
+	mockUseCase *product.MockProductService
 	mockLogger  *mockLogger.MockLogger
 }
 
@@ -36,10 +32,10 @@ func (suite *ProductHandlerTestSuite) TearDownTest() {
 	suite.mockUseCase.AssertExpectations(suite.T())
 }
 
-func (suite *ProductHandlerTestSuite) TestGet_CheckRequestValidation() {
+func (suite *ProductHandlerTestSuite) TestGetProductBySKU_CheckRequestValidation() {
 	for _, testCase := range []struct {
 		name              string
-		routeParam        string
+		path              string
 		expectedStatus    int
 		shouldUseCase     bool
 		useCaseFirstParam domain.SKU
@@ -49,66 +45,57 @@ func (suite *ProductHandlerTestSuite) TestGet_CheckRequestValidation() {
 	}{
 		{
 			name:              "success",
-			routeParam:        "sku=123",
+			path:              "/products/get?sku=123",
 			expectedStatus:    http.StatusOK,
 			shouldUseCase:     true,
 			useCaseFirstParam: domain.SKU(123),
 			useCaseResponse:   domain.Product{SKU: 123, Name: "Test Product", Price: 1000},
-			useCaseErr:        nil,
 		},
 		{
 			name:           "empty sku",
-			routeParam:     "sku=",
+			path:           "/products/get?sku=",
 			expectedStatus: http.StatusBadRequest,
-			shouldUseCase:  false,
 		},
 		{
 			name:           "missing sku",
-			routeParam:     "",
+			path:           "/products/get",
 			expectedStatus: http.StatusBadRequest,
-			shouldUseCase:  false,
-		},
-		{
-			name:           "missing sku",
-			routeParam:     "",
-			expectedStatus: http.StatusBadRequest,
-			shouldUseCase:  false,
 		},
 		{
 			name:           "invalid sku",
-			routeParam:     "sku=abc",
+			path:           "/products/get?sku=abc",
 			expectedStatus: http.StatusBadRequest,
-			shouldUseCase:  false,
 		},
 		{
 			name:           "negative sku",
-			routeParam:     "sku=-1",
+			path:           "/products/get?sku=-1",
 			expectedStatus: http.StatusBadRequest,
-			shouldUseCase:  false,
+		},
+		{
+			name:           "zero sku",
+			path:           "/products/get?sku=0",
+			expectedStatus: http.StatusBadRequest,
 		},
 		{
 			name:           "too large sku",
-			routeParam:     "sku=9999999999",
+			path:           "/products/get?sku=9999999999",
 			expectedStatus: http.StatusBadRequest,
-			shouldUseCase:  false,
 		},
 		{
 			name:              "use case internal error",
-			routeParam:        "sku=10",
+			path:              "/products/get?sku=10",
 			expectedStatus:    http.StatusInternalServerError,
 			shouldUseCase:     true,
 			useCaseFirstParam: domain.SKU(10),
-			useCaseResponse:   domain.Product{},
 			useCaseErr:        errors.New("use case internal error"),
 			shouldLogger:      true,
 		},
 		{
 			name:              "product not found",
-			routeParam:        "sku=10",
+			path:              "/products/get?sku=10",
 			expectedStatus:    http.StatusNotFound,
 			shouldUseCase:     true,
 			useCaseFirstParam: domain.SKU(10),
-			useCaseResponse:   domain.Product{},
 			useCaseErr:        domain.NotFound,
 		},
 	} {
@@ -127,20 +114,16 @@ func (suite *ProductHandlerTestSuite) TestGet_CheckRequestValidation() {
 					Once()
 			}
 
-			req := httptest.NewRequest("GET", "/product/get?"+testCase.routeParam, nil)
-			w := httptest.NewRecorder()
-			suite.handler.Get(w, req)
-			suite.Equal(testCase.expectedStatus, w.Code)
+			rec := suite.serveRequest(http.MethodGet, testCase.path)
+			suite.Equal(testCase.expectedStatus, rec.Code)
 		})
 	}
 }
 
-// Запуск test suite
 func TestProductHandlerSuite(t *testing.T) {
 	suite.Run(t, new(ProductHandlerTestSuite))
 }
 
-// Дополнительные unit тесты без suite
-func TestGet_EdgeCases(t *testing.T) {
+func TestGetProductBySKU_EdgeCases(t *testing.T) {
 	t.Parallel()
 }

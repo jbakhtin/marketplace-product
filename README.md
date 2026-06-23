@@ -27,11 +27,14 @@ DB_NAME=                #имя БД
 ### 2) Команды Makefile
 
 ```bash
-make build  # Сборка контейнеров
-make start  # Запуск docker compose (в фоне)
-make stop   # Остановка docker compose
-make test   # Запуск тестов
+make build     # Сборка контейнеров
+make start     # Запуск docker compose (в фоне)
+make stop      # Остановка docker compose
+make test      # Запуск тестов
+make generate  # Генерация кода из OpenAPI (oapi-codegen)
 ```
+
+OpenAPI-спецификация: `internal/infrastructure/server/openapi/v1/openapi.yaml`
 
 После `make start` приложение поднимется, применит миграции и будет доступно на адресе из 
 `WEBSERVER_REST_ADDRESS`.
@@ -42,6 +45,8 @@ make test   # Запуск тестов
 - `GET  /readyz`   — готовность
 - `GET  /products/get` — получить товар по SKU
 - `GET  /products/list` — получить список SKU
+- `GET  /openapi.yaml` — OpenAPI-спецификация
+- `GET  /swagger/swagger.html` — Swagger UI
 
 ### Примечания
 - Миграции применяются автоматически при старте;

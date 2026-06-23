@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/jbakhtin/marketplace-product/internal/infrastructure/server/rest/handler/response"
+	"github.com/jbakhtin/marketplace-product/internal/infrastructure/server/rest/response"
 )
 
 type Config interface {
@@ -33,7 +33,7 @@ func (m Middleware) Auth(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
-			response.WriteStandardResponse(w, r, http.StatusUnauthorized, nil, errors.New("unauthorized 0"))
+			response.Write(w, http.StatusUnauthorized, nil, errors.New("unauthorized 0"))
 			return
 		}
 
@@ -44,24 +44,24 @@ func (m Middleware) Auth(next http.Handler) http.Handler {
 			return []byte(m.cfg.GetAppKey()), nil
 		})
 		if err != nil {
-			response.WriteStandardResponse(w, r, http.StatusUnauthorized, nil, errors.New(err.Error()))
+			response.Write(w, http.StatusUnauthorized, nil, errors.New(err.Error()))
 			return
 		}
 
 		if !token.Valid {
-			response.WriteStandardResponse(w, r, http.StatusUnauthorized, nil, errors.New("token not valid"))
+			response.Write(w, http.StatusUnauthorized, nil, errors.New("token not valid"))
 			return
 		}
 
 		customClaims, ok := token.Claims.(*jwt.RegisteredClaims)
 		if !ok {
-			response.WriteStandardResponse(w, r, http.StatusUnauthorized, nil, errors.New("custom claims not parsed"))
+			response.Write(w, http.StatusUnauthorized, nil, errors.New("custom claims not parsed"))
 			return
 		}
 
 		userID, err := strconv.Atoi(customClaims.Subject)
 		if err != nil {
-			response.WriteStandardResponse(w, r, http.StatusUnauthorized, nil, errors.New("token not valid"))
+			response.Write(w, http.StatusUnauthorized, nil, errors.New("token not valid"))
 			return
 		}
 		ctx := context.WithValue(r.Context(), "user_id", userID)

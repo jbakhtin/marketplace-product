@@ -14,8 +14,8 @@ type Handler struct {
 	useCase use_case.UseCaseInterface
 }
 
-func NewProductHandler(cfg Config, logger ports.Logger, useCase use_case.UseCaseInterface) (Handler, error) {
-	return Handler{
+func NewProductHandler(cfg Config, logger ports.Logger, useCase use_case.UseCaseInterface) (*Handler, error) {
+	return &Handler{
 		cfg:     cfg,
 		log:     logger,
 		useCase: useCase,
